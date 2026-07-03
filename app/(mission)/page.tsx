@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { MissionHero } from "@/components/mission-control/MissionHero";
+import { ExecutiveMetricsBar } from "@/components/mission-control/ExecutiveMetricsBar";
 import { ExpansionTheater } from "@/components/expansion-theater/ExpansionTheater";
 import { TerritoryPanel } from "@/components/territories/TerritoryPanel";
 import { IntelFeed } from "@/components/intelligence/IntelFeed";
@@ -14,15 +15,19 @@ import { rankTerritories } from "@/lib/scoring";
 export default function Page() {
   const ranked = useMemo(() => rankTerritories(territories), []);
   const [selectedId, setSelectedId] = useState(ranked[0]?.id ?? "");
+
   const selected =
     territories.find((territory) => territory.id === selectedId) ??
     ranked[0] ??
     territories[0];
+
   const campaign = campaigns[0];
 
   return (
     <section className="space-y-6 p-5 lg:p-8">
       <MissionHero />
+
+      <ExecutiveMetricsBar />
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_.9fr]">
         <div className="space-y-6">
@@ -34,6 +39,7 @@ export default function Page() {
 
           <GlassPanel className="p-5">
             <h3 className="mb-4 text-xl font-black">Priority Territories</h3>
+
             <div className="grid gap-3 lg:grid-cols-5">
               {ranked.map((territory, index) => (
                 <button
@@ -49,7 +55,9 @@ export default function Page() {
                     <span>#{index + 1}</span>
                     <span>{territory.status}</span>
                   </div>
+
                   <div className="mt-2 font-black">{territory.name}</div>
+
                   <div className="mt-3 text-3xl font-black text-amber-300">
                     {territory.readiness}
                   </div>
@@ -60,9 +68,9 @@ export default function Page() {
         </div>
 
         <div className="space-y-6">
-          <TerritoryPanel territory={selected} />
+          {selected && <TerritoryPanel territory={selected} />}
           <IntelFeed />
-          <CampaignCard campaign={campaign} />
+          {campaign && <CampaignCard campaign={campaign} />}
         </div>
       </div>
     </section>
