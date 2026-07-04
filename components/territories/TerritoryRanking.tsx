@@ -2,6 +2,7 @@
 
 import type { Territory } from "@/types/territory";
 import { GlassPanel } from "@/components/ui/GlassPanel";
+import { analyzeTerritory } from "@/lib/intelligence";
 
 export function TerritoryRanking({
   territories,
@@ -12,6 +13,10 @@ export function TerritoryRanking({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
+  const ranked = [...territories].sort(
+    (a, b) => analyzeTerritory(b).readiness - analyzeTerritory(a).readiness
+  );
+
   return (
     <GlassPanel className="p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -25,13 +30,14 @@ export function TerritoryRanking({
         </div>
 
         <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-400">
-          Ranked by readiness
+          Ranked by calculated readiness
         </span>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-5">
-        {territories.map((territory, index) => {
+        {ranked.map((territory, index) => {
           const active = selectedId === territory.id;
+          const report = analyzeTerritory(territory);
 
           return (
             <button
@@ -45,20 +51,18 @@ export function TerritoryRanking({
             >
               <div className="flex justify-between text-xs text-slate-400">
                 <span>#{index + 1}</span>
-                <span>{territory.status}</span>
+                <span>{report.recommendation}</span>
               </div>
 
-              <div className="mt-2 font-black text-white">
-                {territory.name}
-              </div>
+              <div className="mt-2 font-black text-white">{territory.name}</div>
 
               <div className="mt-3 flex items-end justify-between">
                 <div className="text-3xl font-black text-amber-300">
-                  {territory.readiness}
+                  {report.readiness}
                 </div>
 
                 <span className="text-xs font-bold text-slate-500">
-                  ready
+                  calc
                 </span>
               </div>
             </button>
