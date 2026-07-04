@@ -1,62 +1,103 @@
-import { ArrowUpRight, Crosshair, RadioTower, Rocket } from "lucide-react";
+"use client";
 
-export function CommanderPanel() {
+import type { Territory } from "@/types/territory";
+import { GlassPanel } from "@/components/ui/GlassPanel";
+
+export function CommanderPanel({ territory }: { territory?: Territory }) {
+  if (!territory) {
+    return (
+      <GlassPanel className="p-6">
+        <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">
+          AI Commander
+        </p>
+        <h2 className="mt-2 text-3xl font-black text-white">
+          Awaiting Territory
+        </h2>
+        <p className="mt-3 text-slate-400">
+          Select a territory to generate mission intelligence.
+        </p>
+      </GlassPanel>
+    );
+  }
+
+  const strongestSignal = Object.entries(territory.scores).sort(
+    ([, a], [, b]) => b - a
+  )[0];
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-2xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-400 text-slate-950">
-            <RadioTower size={22} />
-          </span>
+    <GlassPanel className="p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">
+            AI Commander
+          </p>
 
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">
-              AI Commander
-            </p>
-            <h3 className="text-2xl font-black text-white">Deploy Dallas</h3>
-          </div>
+          <h2 className="mt-2 text-3xl font-black text-white">
+            Deploy {territory.city}
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-400">
+            {territory.region} · {territory.status}
+          </p>
         </div>
 
-        <div className="rounded-2xl bg-emerald-400/10 px-4 py-2 text-right">
-          <div className="text-2xl font-black text-emerald-300">94%</div>
-          <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
-            Confidence
+        <div className="text-right">
+          <div className="text-5xl font-black text-amber-300">
+            {territory.readiness}
           </div>
+          <div className="text-xs uppercase tracking-widest text-slate-500">
+            Readiness
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+        <div className="text-xs font-black uppercase tracking-[0.22em] text-emerald-300">
+          Strongest Signal
+        </div>
+        <div className="mt-2 text-xl font-black capitalize text-white">
+          {strongestSignal?.[0] ?? "Momentum"} · {strongestSignal?.[1] ?? 0}
         </div>
       </div>
 
       <div className="mt-6 grid gap-3">
-        <Signal label="Permit momentum" value="+18%" />
-        <Signal label="Industrial growth" value="Extreme" />
-        <Signal label="Weather window" value="Favorable" />
-        <Signal label="Competition pressure" value="Manageable" />
+        <ScoreLine label="Roofing" value={territory.scores.roofing} />
+        <ScoreLine label="FM" value={territory.scores.fm} />
+        <ScoreLine label="Permits" value={territory.scores.permits} />
+        <ScoreLine label="Industrial" value={territory.scores.industrial} />
       </div>
 
       <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4">
-        <div className="flex items-center gap-2 text-sm font-black text-amber-300">
-          <Crosshair size={17} />
-          Recommended Action
+        <div className="text-xs font-black uppercase tracking-[0.22em] text-amber-300">
+          Mission Order
         </div>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
-          Launch Dallas campaign within 30 days. Assign 2 business developers,
-          1 estimator, and 1 service lead.
+        <p className="mt-3 leading-7 text-slate-300">{territory.aiSummary}</p>
+        <p className="mt-3 font-black text-white">
+          {territory.recommendedAction}
         </p>
       </div>
 
-      <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-400 px-5 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.02]">
-        <Rocket size={18} />
-        Launch Campaign
-        <ArrowUpRight size={18} />
+      <button className="mt-6 w-full rounded-2xl bg-amber-400 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.01]">
+        Launch {territory.city} Mission
       </button>
-    </div>
+    </GlassPanel>
   );
 }
 
-function Signal({ label, value }: { label: string; value: string }) {
+function ScoreLine({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-      <span className="text-sm font-bold text-slate-400">{label}</span>
-      <span className="text-sm font-black text-white">{value}</span>
+    <div>
+      <div className="mb-2 flex items-center justify-between text-sm">
+        <span className="font-bold text-slate-400">{label}</span>
+        <span className="font-black text-white">{value}</span>
+      </div>
+
+      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-emerald-400"
+          style={{ width: `${value}%` }}
+        />
+      </div>
     </div>
   );
 }
