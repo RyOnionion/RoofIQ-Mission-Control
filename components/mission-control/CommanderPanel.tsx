@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Territory } from "@/types/territory";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { analyzeTerritory } from "@/lib/intelligence";
@@ -11,9 +12,11 @@ export function CommanderPanel({ territory }: { territory?: Territory }) {
         <p className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">
           AI Commander
         </p>
+
         <h2 className="mt-2 text-3xl font-black text-white">
           Awaiting Territory
         </h2>
+
         <p className="mt-3 text-slate-400">
           Select a territory to generate mission intelligence.
         </p>
@@ -44,6 +47,7 @@ export function CommanderPanel({ territory }: { territory?: Territory }) {
           <div className="text-5xl font-black text-amber-300">
             {report.readiness}
           </div>
+
           <div className="text-xs uppercase tracking-widest text-slate-500">
             Calculated
           </div>
@@ -68,15 +72,22 @@ export function CommanderPanel({ territory }: { territory?: Territory }) {
         <div className="text-xs font-black uppercase tracking-[0.22em] text-amber-300">
           Mission Assessment
         </div>
-        <p className="mt-3 leading-7 text-slate-300">{territory.aiSummary}</p>
+
+        <p className="mt-3 leading-7 text-slate-300">
+          {territory.aiSummary}
+        </p>
+
         <p className="mt-3 font-black text-white">
           {territory.recommendedAction}
         </p>
       </div>
 
-      <button className="mt-6 w-full rounded-2xl bg-amber-400 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.01]">
+      <Link
+        href={`/campaigns?territory=${territory.id}`}
+        className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-400 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.01]"
+      >
         Launch {territory.city} Mission
-      </button>
+      </Link>
     </GlassPanel>
   );
 }
@@ -93,6 +104,7 @@ function CommanderMetric({
       <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
         {label}
       </div>
+
       <div className="mt-1 text-sm font-black capitalize text-white">
         {value}
       </div>
