@@ -33,6 +33,7 @@ export function NationalTheater() {
   );
 
   const [selectedId, setSelectedId] = useState(ranked[0]?.id ?? "");
+  
   const selected =
     territories.find((territory) => territory.id === selectedId) ??
     ranked[0] ??
