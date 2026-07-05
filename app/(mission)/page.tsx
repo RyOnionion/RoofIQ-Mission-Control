@@ -46,11 +46,13 @@ export default function Page() {
           />
         </div>
 
-        <div className="space-y-6">
-          {selected && <CommanderPanel territory={selected} />}
-          <IntelFeed />
-          {campaign && <CampaignCard campaign={campaign} />}
-        </div>
+<div className="space-y-6">
+  {selected && <CommanderPanel territory={selected} />}
+
+  <IntelFeed territoryId={selected.id} />
+
+  {campaign && <CampaignCard campaign={campaign} />}
+</div>
       </div>
     </section>
   );
