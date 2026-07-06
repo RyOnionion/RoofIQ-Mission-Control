@@ -33,13 +33,19 @@ export function NationalTheater() {
   );
 
   const [selectedId, setSelectedId] = useState(ranked[0]?.id ?? "");
-  
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const selected =
     territories.find((territory) => territory.id === selectedId) ??
     ranked[0] ??
     territories[0];
 
   const report = analyzeTerritory(selected);
+
+  function selectTerritory(id: string) {
+    setSelectedId(id);
+    setDrawerOpen(true);
+  }
 
   return (
     <div className="grid h-full gap-6 xl:grid-cols-[1fr_420px]">
@@ -113,7 +119,7 @@ export function NationalTheater() {
               return (
                 <Marker key={territory.id} coordinates={point}>
                   <g
-                    onClick={() => setSelectedId(territory.id)}
+                    onClick={() => selectTerritory(territory.id)}
                     className="cursor-pointer"
                   >
                     {active && (
@@ -181,6 +187,13 @@ export function NationalTheater() {
           <TheaterStat label="Recommendation" value={report.recommendation} />
           <TheaterStat label="Pipeline" value={selected.expectedPipeline} />
         </div>
+
+        <TerritoryDrawer
+          open={drawerOpen}
+          selected={selected}
+          report={report}
+          onClose={() => setDrawerOpen(false)}
+        />
       </GlassPanel>
 
       <GlassPanel className="flex min-h-[640px] flex-col p-6">
@@ -238,7 +251,7 @@ export function NationalTheater() {
               return (
                 <button
                   key={territory.id}
-                  onClick={() => setSelectedId(territory.id)}
+                  onClick={() => selectTerritory(territory.id)}
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
                     active
                       ? "border-amber-400 bg-amber-400/10"
@@ -265,6 +278,117 @@ export function NationalTheater() {
           Launch {selected.city} Mission
         </Link>
       </GlassPanel>
+    </div>
+  );
+}
+
+function TerritoryDrawer({
+  open,
+  selected,
+  report,
+  onClose,
+}: {
+  open: boolean;
+  selected: (typeof territories)[number];
+  report: ReturnType<typeof analyzeTerritory>;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className={`absolute bottom-0 right-0 top-0 z-30 w-full max-w-[390px] border-l border-white/10 bg-slate-950/95 p-5 shadow-2xl backdrop-blur transition-transform duration-300 ${
+        open ? "translate-x-0" : "translate-x-full"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-400">
+            Territory Intelligence
+          </p>
+
+          <h3 className="mt-2 text-2xl font-black text-white">
+            {selected.name}
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-400">
+            {selected.region} · {selected.status}
+          </p>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="rounded-full border border-white/10 px-3 py-1 text-xs font-black text-slate-400 transition hover:border-amber-400 hover:text-amber-300"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <DrawerMetric label="Score" value={report.readiness} />
+        <DrawerMetric label="Confidence" value={`${report.confidence}%`} />
+        <DrawerMetric label="Pipeline" value={selected.expectedPipeline} />
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4">
+        <div className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">
+          Commander Read
+        </div>
+
+        <p className="mt-3 text-sm leading-6 text-slate-300">
+          {selected.aiSummary}
+        </p>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+            Signal Stack
+          </span>
+
+          <span className="text-xs font-black uppercase text-emerald-300">
+            {report.recommendation}
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          <ScoreLine label="Roofing Demand" value={selected.scores.roofing} />
+          <ScoreLine label="FM Asset Density" value={selected.scores.fm} />
+          <ScoreLine label="Weather Pressure" value={selected.scores.weather} />
+          <ScoreLine label="Permit Momentum" value={selected.scores.permits} />
+          <ScoreLine label="Industrial Growth" value={selected.scores.industrial} />
+          <ScoreLine label="Competition" value={selected.scores.competition} />
+          <ScoreLine label="Labor Access" value={selected.scores.labor} />
+          <ScoreLine label="Market Momentum" value={selected.scores.momentum} />
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+          Next Mission
+        </div>
+
+        <p className="mt-3 text-sm font-black text-white">
+          {selected.recommendedAction}
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          Strongest signal is{" "}
+          <span className="font-black text-amber-300">
+            {report.strongestSignal}
+          </span>
+          . Weakest constraint is{" "}
+          <span className="font-black text-red-300">
+            {report.weakestSignal}
+          </span>
+          .
+        </p>
+      </div>
+
+      <Link
+        href={`/campaigns?territory=${selected.id}`}
+        className="mt-5 flex w-full items-center justify-center rounded-2xl bg-amber-400 py-4 text-sm font-black text-slate-950 transition hover:scale-[1.01]"
+      >
+        Launch Campaign
+      </Link>
     </div>
   );
 }
@@ -309,6 +433,23 @@ function CommanderMetric({
       <div className="mt-1 text-sm font-black capitalize text-white">
         {value}
       </div>
+    </div>
+  );
+}
+
+function DrawerMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
     </div>
   );
 }

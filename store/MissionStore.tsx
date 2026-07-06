@@ -8,36 +8,66 @@ import {
   type ReactNode,
 } from "react";
 
-type MissionStore = {
+import { territories } from "@/data/mock/territories";
+import type { Territory } from "@/types/territory";
+
+type CommandMode = "overview" | "campaign" | "territory" | "intelligence";
+
+type MissionStoreValue = {
+  territories: Territory[];
+  selectedTerritory: Territory;
   selectedTerritoryId: string;
-  setSelectedTerritoryId: (id: string) => void;
+  commandMode: CommandMode;
+  setSelectedTerritoryId: (territoryId: string) => void;
+  setCommandMode: (mode: CommandMode) => void;
 };
 
-const MissionContext = createContext<MissionStore | null>(null);
+const MissionStoreContext = createContext<MissionStoreValue | null>(null);
 
-export function MissionProvider({ children }: { children: ReactNode }) {
-  const [selectedTerritoryId, setSelectedTerritoryId] = useState("");
+export function MissionStoreProvider({ children }: { children: ReactNode }) {
+  const [selectedTerritoryId, setSelectedTerritoryIdState] = useState(
+    territories[0]?.id ?? ""
+  );
+  const [commandMode, setCommandMode] = useState<CommandMode>("overview");
 
-  const value = useMemo(
+  const selectedTerritory =
+    territories.find((territory) => territory.id === selectedTerritoryId) ??
+    territories[0];
+
+  function setSelectedTerritoryId(territoryId: string) {
+    const territoryExists = territories.some(
+      (territory) => territory.id === territoryId
+    );
+
+    if (!territoryExists) return;
+
+    setSelectedTerritoryIdState(territoryId);
+  }
+
+  const value = useMemo<MissionStoreValue>(
     () => ({
+      territories,
+      selectedTerritory,
       selectedTerritoryId,
+      commandMode,
       setSelectedTerritoryId,
+      setCommandMode,
     }),
-    [selectedTerritoryId]
+    [selectedTerritory, selectedTerritoryId, commandMode]
   );
 
   return (
-    <MissionContext.Provider value={value}>
+    <MissionStoreContext.Provider value={value}>
       {children}
-    </MissionContext.Provider>
+    </MissionStoreContext.Provider>
   );
 }
 
 export function useMissionStore() {
-  const context = useContext(MissionContext);
+  const context = useContext(MissionStoreContext);
 
   if (!context) {
-    throw new Error("useMissionStore must be used inside MissionProvider");
+    throw new Error("useMissionStore must be used inside MissionStoreProvider");
   }
 
   return context;
