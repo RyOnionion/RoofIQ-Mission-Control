@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { tasks as initialTasks } from "@/data/mock/tasks";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 
@@ -44,14 +45,18 @@ export function TaskBoard() {
             >
               <div className="text-left">
                 <div className="font-bold text-white">{task.title}</div>
-                <div className="text-sm text-slate-400">{task.category}</div>
+                <div className="text-sm text-slate-400">
+                  {task.category} · {task.points} pts
+                </div>
               </div>
 
               <div
                 className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
                   complete
                     ? "bg-emerald-500 text-white"
-                    : "bg-slate-700 text-slate-300"
+                    : task.status === "active"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-700 text-slate-300"
                 }`}
               >
                 {task.status}
